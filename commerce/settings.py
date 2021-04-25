@@ -167,7 +167,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # MEDIA_ROOT =  os.path.join(BASE_DIR, 'media') 
 # MEDIA_URL = '/media/'
 
-DISABLE_COLLECTSTATIC =True
+DISABLE_COLLECTSTATIC = 1
 
 STATIC_URL = '/static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
