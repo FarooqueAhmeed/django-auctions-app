@@ -6,17 +6,10 @@ comment on those listings, and add listings to a “watchlist.”
 ```
 
 
-Inside project's root folder, I have two apps ([auctions](https://github.com/AmaniEzz/django-auctions-app/tree/master/auctions) app) and ( [api](https://github.com/AmaniEzz/django-auctions-app/tree/master/api) app).
-
-
-
-### Visit webiste here ---> [https://djangoauctionapp.herokuapp.com/](https://djangoauctionapp.herokuapp.com/)
-### Or see a live Demo video on [Youtube](https://www.youtube.com/watch?v=61lkNZD7zX4)
-------------------------------------------------------------------------------------------
 
 # Website Functionalities
 
-- **PostgreSQL Database**: In this project, I've created 5 database tables, ***Listings*** table, ***Bid*** table, ***Comments*** table, ***Categories*** table and finally ***Categories*** table. In addition to Django abstract User model. Interactions with the database are done using Django ORM. see [Models.py](https://github.com/AmaniEzz/django-auctions-app/blob/master/auctions/models.py)
+- **PostgreSQL Database**: In this project, I've created 5 database tables, ***Listings*** table, ***Bid*** table, ***Comments*** table, ***Categories*** table and finally ***Categories*** table. 
 
 - **Create Listing page:** Logged in Users can visit a page to create a new listing. They're able to specify a title for the listing, a text-based description, a starting bid, the desired price, a URL for an image for the listing, and/or a category (e.g. Antique, Home, Electronics, Beauty, etc..).
 
@@ -72,9 +65,6 @@ so far, and demonstrating my skills.
 | `GET` | `/api/categories/` | create or read a list of categories
 
 
-> See API's [views.py](https://github.com/AmaniEzz/django-auctions-app/blob/master/api/views.py)
-
------
 
 # Technology stack
 
