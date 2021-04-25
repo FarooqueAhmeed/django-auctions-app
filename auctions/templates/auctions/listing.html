@@ -1,0 +1,294 @@
+{% extends "auctions/layout.html" %}
+
+<script>
+  function setTwoNumberDecimal(event) {
+    this.value = parseFloat(this.value).toFixed(2);
+}
+</script>
+
+{% load static %}
+{% block body %}
+
+{% if user.is_authenticated and listing.seller == user and listing.active %}
+<div id="container">
+  <div class="row">
+    <div class="column">
+          <img class="column_card" src="{{ listing.image }}" alt="Card image cap" ><br>
+    </div>
+    <div class="column" style="width: 60%;">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ listing.title }}</h5>
+          <p class="card-text"> Seller: <code>@{{ listing.seller }}</code></p>
+          <hr>
+
+              <p class="card-text"> <strong>Starting Bid:</strong> ${{ listing.starting_bid }}</p>
+              <p class="card-text"> <strong>Current price:</strong> ${{ listing.highest_bid }}</p>
+              <p class="card-text"> <strong>Bidder:</strong> <code>@{{ listing.Winner }}</code></p>
+
+          <div >
+              <a href="{% url 'close_auction' listing.id %}" type="submit" role="button" class="btn btn-primary">Close Auction</a>
+          </div>
+          </div>
+      </div>
+      </div>
+  </div>
+  <div class="row">
+     <div class="listing_card" >
+        <h4> {{ listing.title }}   </h4>
+        <p class="card-text">{{ listing.description }}</p>
+        <p  style="font-size: smaller;"> Created {{ listing.created_at }}</p>
+    </div>
+  </div>
+
+  <hr style="background-color: rgb(156, 156, 156, 0.4); margin: 20px 25px 0px 25px;">
+
+  <div class="row">
+    <div>
+      <h2 style="padding-bottom: 10px;"> Recent Comments</h2>
+      {% for comment in comment_list %}
+    <div class="card card_comment" style="padding: 0; width: 720px">
+        <div class="card-header">
+            Comment by: <code>  @{{ comment.commenter }}</code>  
+        </div>
+     <div class="card-body">
+         <blockquote class="blockquote mb-0">
+             <p>{{ comment }}</p>
+             <footer class="blockquote-footer"><cite title="Source Title">{{ comment.date }}</cite></footer>
+         </blockquote>
+     </div>
+    </div>
+    {% endfor %}
+  </div>
+  </div>
+
+{% elif user.is_authenticated and listing.active == 0 %}
+<div class="listing_footer">
+    {% if user == listing.Winner %}
+        <div class="alert alert-success" style="text-align: center" role="alert">
+            Auction closed. You win!
+        </div>
+    {% elif user != listing.Winner  and  user != listing.seller %}
+        <div class="alert alert-success" style="text-align: center" role="alert">
+            Sorry you missed out! <br>
+            This auction is closed
+        </div>
+    {% elif user == listing.seller and listing.Winner == None %}
+        <div class="alert alert-success" style="text-align: center" role="alert">
+          <p  class="alert-heading">Auction closed with no Winner!</p>
+            <div>
+              <a href="{% url 'reopen_auction' listing.id %}" type="submit" role="button" class="btn btn-primary btn-sm">Reopen Auction</a>
+            </div>
+        </div>
+    {% elif user == listing.seller and listing.Winner != None %}
+    <div class="alert alert-success" style="text-align: center;" role="alert">
+      <h4 class="alert-heading">Auction Closed!</h4>
+      <p class="mb-0">Winner is : <code>@{{listing.Winner}}</code></p>
+      <p class="mb-0">Price is : ${{listing.highest_bid}}</p>
+
+  </div>
+    {% endif %}
+</div>
+{% endif %}
+
+
+{% if user.is_authenticated and listing.active and user != listing.seller %}
+<div id="container">
+  <div class="row" style="padding-left: 80px;">
+    <div class="column">
+          <img class="column_card" src="{{ listing.image }}" alt="Card image cap" ><br>
+    </div>
+
+    <div class="column" style="width: 50%;">
+      <div class="column_card" >
+        <div class="row1">
+            <div class="card-body" > 
+              <h4 style="padding-bottom: 20px;font-size: x-large;" class="card-title"> {{ listing.title }}</h4>
+              <div class="card-text">Seller: <code>@{{ listing.seller }}</code> </div>
+              {% if listing.Winner !=  None %}
+                  <div class="card-text">Current price:<strong>  ${{ listing.highest_bid }}</strong></div> 
+              {% elif listing.Winner ==  None %}
+                  <div class="card-text">Current price:<strong>  ${{ listing.starting_bid }}</strong></div> 
+              {% endif %}
+
+        </div>
+        </div>
+
+        <div class="row2" >
+          <div class="card-body" > 
+          <form action="{% url 'make_bid' listing.id %}" method="POST" class="column" style="margin-right: 60px;">
+            {% csrf_token %}
+            <div style="color: rgba(10, 10, 10, 0.692);"> <h4 > Place a Bid </h4> </div>
+            {% if listing.Winner !=  None %}
+            <span  style="color: rgba(75, 84, 94, 0.74);font-size: 12px;font-family: Verdana, Geneva, Tahoma, sans-serif;"> 
+              bid must be greater than the highest bid ${{ listing.highest_bid }}
+            </span> 
+            <div style="padding: 12px 0 10px 0;" >
+              <input style="width: 100%;padding: 5px;" class="form-control form-control-sm" type="number" name="amount" min="{{ min_bid }}"  placeholder="{{ listing.highest_bid }}" value="{{ listing.highest_bid }}" step=".1" oninput="setTwoNumberDecimal">              
+            </div> 
+            {% elif listing.Winner ==  None %}
+            <span  style="color: rgba(75, 84, 94, 0.74);font-size: 12px;font-family: Verdana, Geneva, Tahoma, sans-serif;"> 
+              bid must be greater than the highest bid ${{ listing.starting_bid }}
+            </span>
+            <div style="padding: 12px 0 10px 0;" >
+              <input style="width: 100%;padding: 5px;" class="form-control form-control-sm" type="number" name="amount" min="{{ min_starting_bid }}"  placeholder="{{ listing.starting_bid }}" value="{{ listing.starting_bid }}" step=".1" oninput="setTwoNumberDecimal"> </div>
+            {% endif %}
+
+            <input class="btn btn-primary btn-sm" type="submit" value="Place Bid">
+            
+            <span>  
+              <a href="{% url 'add_to_wishlist' listing.id %}" type="submit" role="button" class="btn btn-primary btn-sm">Add to Watchlist</a>
+            </span>
+
+            {% if messages %}
+            <div class="box arrow-top">
+              {% for message in messages %}
+                      {{ message }}
+              {% endfor %}
+            </div>
+            {% endif %}
+        </form> 
+
+
+        {% if listing.highest_bid <= listing.desired_price  %}
+        <form action="{% url 'cart_add' listing.id %}" method="POST" class="column">
+            {% csrf_token %}
+            <div  style="color: rgba(10, 10, 10, 0.692);"> <h4 >Or Buy it for </h4></div>
+            <div>Price:<strong> ${{listing.desired_price}}</strong></div> 
+            <div style="color: rgb(75, 84, 94);font-size: x-small;padding-left: 40px;">+ $10 shipping fees</strong></div> 
+            <div style="padding: 50px 0 10px 0;">  
+              <a href="{% url 'cart_add' listing.id %}" type="submit" role="button" class="btn btn-primary btn-sm">Add to Cart</a>
+            </div>
+        </form> 
+        {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="row">
+      <div class="listing_card" >
+        <h4 > {{ listing.title }}</h4>
+        <p >{{listing.description }}</p>
+
+        <p  style="font-size: smaller;"> Created {{ listing.created_at }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="listing_card">
+      <form action="{% url 'add_comment' listing.id %}" method="POST">
+          {% csrf_token %}
+          <div> Write a comment</div>
+          <div >
+            <textarea name="comment" rows="5" cols="100">  </textarea>
+          </div>
+            <input class="btn btn-primary" type="submit" value="Comment">
+      </form>
+    </div>
+</div>
+<hr style="background-color: rgb(156, 156, 156, 0.4); margin: 20px 25px 0px 25px;">
+
+<div class="row">
+  <div>
+    <h2 style="padding-bottom: 10px;"> Recent Comments</h2>
+    {% for comment in comment_list %}
+  <div class="card card_comment" style="padding: 0; width: 720px">
+      <div class="card-header">
+        Comment by: <code>  @{{ comment.commenter }}</code>  
+      </div>
+   <div class="card-body">
+       <blockquote class="blockquote mb-0">
+           <p>{{ comment }}</p>
+           <footer class="blockquote-footer"><cite title="Source Title">{{ comment.date }}</cite></footer>
+       </blockquote>
+   </div>
+  </div>
+  {% endfor %}
+</div>
+</div>
+  {% endif %}
+
+
+  {% if user.is_authenticated == 0 %}
+<div id="container">
+  <div class="row">
+    <div class="column">
+          <img class="column_card" src="{{ listing.image }}" alt="Card image cap" ><br>
+    </div>
+
+    <div class="column" style="width: 50%;">
+      <div class="column_card" >
+        <div class="row1">
+            <div class="card-body" > 
+              <h4 style="padding-bottom: 20px;font-size: x-large;" class="card-title"> {{ listing.title }}</h4>
+              <div class="card-text">Seller: <code>@{{ listing.seller }}</code> </div>
+              {% if listing.Winner !=  None %}
+                  <div class="card-text">Current price:<strong>  ${{ listing.highest_bid }}</strong></div> 
+              {% elif listing.Winner ==  None %}
+                  <div class="card-text">Current price:<strong>  ${{ listing.starting_bid }}</strong></div> 
+              {% endif %}
+
+        </div>
+        </div>
+
+        <div class="row2" >
+          <div class="card-body"  > 
+            <form action="{% url 'login' %}" method="POST" class="column" style="width: 100%;">
+              {% csrf_token %}
+              <div  style="color: rgba(10, 10, 10, 0.822);"> <h3> To buy or make a bid </h3></div>
+              <div  style="color: rgba(10, 10, 10, 0.692);"> <h4 >Please Login </h4></div>
+              <div style="padding-top: 20px;">  
+                <a href="{% url 'login' %}" type="submit" role="button" class="btn btn-primary btn">Login</a>
+              </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="row">
+      <div class="listing_card" >
+        <h4 > {{ listing.title }}</h4>
+        <p >{{listing.description }}</p>
+
+        <p  style="font-size: smaller;"> Created {{ listing.created_at }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="listing_card">
+      <form action="{% url 'add_comment' listing.id %}" method="POST">
+          {% csrf_token %}
+          <div> Write a comment</div>
+          <div >
+            <textarea name="comment" rows="5" cols="100">  </textarea>
+          </div>
+            <input class="btn btn-primary" type="submit" value="Comment">
+      </form>
+    </div>
+</div>
+<hr style="background-color: rgb(156, 156, 156, 0.4); margin: 20px 25px 0px 25px;">
+
+<div class="row">
+  <div>
+    <h2 style="padding-bottom: 10px;"> Recent Comments</h2>
+    {% for comment in comment_list %}
+  <div class="card card_comment" style="padding: 0; width: 720px">
+      <div class="card-header">
+        Comment by: <code>  @{{ comment.commenter }}</code>  
+      </div>
+   <div class="card-body">
+       <blockquote class="blockquote mb-0">
+           <p>{{ comment }}</p>
+           <footer class="blockquote-footer"><cite title="Source Title">{{ comment.date }}</cite></footer>
+       </blockquote>
+   </div>
+  </div>
+  {% endfor %}
+</div>
+</div>
+{% endif %}
+{% endblock %}

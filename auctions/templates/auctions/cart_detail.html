@@ -1,0 +1,52 @@
+{% extends "auctions/layout.html" %}
+{% load cart_tag %}
+
+{% block body %}
+
+
+<div class="shopping-cart">
+
+{% if message %}
+    <div class="title">
+      {{ message }}
+    </div>
+{% else %}
+
+    <!-- Title -->
+    <div class="title">
+      Shopping Bag
+      {% if length != 0 %}
+            <span class="badge badge-secondary">{{request.session.cart|length}}</span>
+      {% endif %}
+    </div>
+
+    {% for key,value in request.session.cart.items %}
+
+    <!-- Product #1 -->
+    <div class="item">
+      <div class="buttons" id="column1">
+        <span class="delete-btn"> 
+          <a href="{% url 'item_clear' value.product_id %}" type="submit" role="button" class="btn">
+            <i class="fa fa-trash"></i>
+          </a>
+        </span>
+      </div>
+   
+      <div class="image" id="column2">
+        <img src="{{ value.image }}" alt="" style="width: 100px; height: 100px; margin: 0;"/>
+      </div>
+   
+      <div class="description" id="column3">
+        <a href="{% url 'listingpage' value.product_id %}">
+          <span >{{ value.name }}</span>
+        </a>
+      </div>
+
+      <div class="total-price" id="column4s">${{ value.price }}</div>
+    </div>
+
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{% endblock %}
